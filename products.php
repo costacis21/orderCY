@@ -20,7 +20,7 @@ height:10%;
 <body>
  <div>
         <nav class="navbar navbar-light navbar-expand-md navigation-clean">
-            <div class="container"><a class="navbar-brand" href="#">Portal</a><button class="navbar-toggler" data-toggle="collapse" data-target="#navcol-1"><span class="sr-only">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
+            <div class="container"><a class="navbar-brand" href="#">Products Portal</a><button class="navbar-toggler" data-toggle="collapse" data-target="#navcol-1"><span class="sr-only">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
                 <div class="collapse navbar-collapse"
                     id="navcol-1">
                     <ul class="nav navbar-nav ml-auto">
@@ -37,44 +37,47 @@ include('dbfunctions.php');
 include('validation.php');
 //function to refresh the site
 
-//prompt for errors and reload site
-function displayErr($priceErr = '', $imgErr = '', $descriptionErr = '', $nameErr = '')
-{
-			echo '<script>
-		if("' . $imgErr . $priceErr . $nameErr . $descriptionErr . '"!==""){
-			pressed=confirm("' . $imgErr . $priceErr . $nameErr . $descriptionErr . '");
-			if(pressed==true || pressed==false){
-				window.location="' . $_SERVER['REQUEST_URI'] . '";
-			}
-		}else{
-			window.location="' . $_SERVER['REQUEST_URI'] . '";
 
-		}
-			
-			</script>';
+function IsChecked($chkname,$value)
+{
+    if(!empty($_POST[$chkname]))
+    {
+        foreach($_POST[$chkname] as $chkval)
+        {
+            if($chkval == $value)
+            {
+                return true;
+            }
+        }
+    }
+    return false;
 }
+
+
 //initializes variables and arrays
 $venueID=$_GET["VenueID"];
 $servername = "localhost";
-$username   = "costacis";
-$password   = "mynameisjeff69";
+$username   = "root";
+$password   = "";
 $dbname     = "orderCy";
-$ItemsID = array(
-			''
+$ItemsID[0] = array(
+
 );
 $Names      = array(
 			''
 );
 $Prices     = array(
-			''
+
 );
 
 $Photos       = array(
-			''
+
 );
-$Visible = array('');
+$Visible = array();
 $Descriptions= array('');
-$Types=array('');
+$Types=array();
+$VSelected=array();
+$NVSelected=array();
 
 $imgErr     = $priceErr = $nameErr = $descriptionErr = '';
 //creates connection with server
@@ -82,7 +85,10 @@ $imgErr     = $priceErr = $nameErr = $descriptionErr = '';
 //checks if db exists and if not creates it
 //createDB($conn, $dbname);
 //creates connection with db
+ini_set('log_errors',1);
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 $conn = mysqli_connect($servername, $username, $password, $dbname);
+
 //checks if tb exists and if not creates it
 //if (!checkTables($conn, $dbname, 'tbproducts')) {
 //			$sqlTBcreate = 'CREATE TABLE tbproducts (productID INT(3) PRIMARY KEY NOT NULL AUTO_INCREMENT, img TEXT ,name TINYTEXT NOT NULL, description TEXT NOT NULL, price FLOAT NOT NULL, status TINYTEXT NOT NULL)';
@@ -95,7 +101,7 @@ $Name    = $Description = $Price = "";
 $sql     = "SELECT * FROM Items";
 $result  = mysqli_query($conn, $sql);
 //store everything in array for each entity
-$x       = 0;
+$x = 0;
 while ($row = mysqli_fetch_assoc($result)) {
     if($venueID==$row['VenueID']){
 			$Names[$x]        = $row['Name'];
@@ -103,10 +109,23 @@ while ($row = mysqli_fetch_assoc($result)) {
 			$Descriptions[$x] = $row['Description'];
 			$Prices[$x]       = $row['Price'];
 			$Photos[$x]         = $row['Photo'];
-            $Visible[$x]        = $row['Visible'];
+			$PhotosProperties[$x]= $row['PhotoProperties'];
+            if($row["Visible"]==True){
+                $Visible[$x]        ="Visible";
+                $VSelected[$x]="Selected";
+                $NVSelected[$x]="";
+            }else{
+                $Visible[$x]        ="Not Visible";
+                $NVSelected[$x]="Selected";
+                $VSelected[$x]="";
+
+            }
+
+
             $Types[$x]          =$row['Type'];
+        $x++;
     }
-			++$x;
+
 }
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 			//gets action to perform
@@ -117,53 +136,55 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 			}
 			if ($action == 'Delete') {
 						//deletes record and refreshes primarykey ID
-						$sqlquerry = "DELETE FROM Items WHERE ItemID=$ItemID";
+						$sqlquerry = "DELETE FROM Items WHERE ItemID='{$ItemID}'";
 						mysqli_query($conn, $sqlquerry);
-						mysqli_query($conn, "ALTER TABLE Items DROP COLUMN ItemID");
-						mysqli_query($conn, "ALTER TABLE Items ADD ItemID INT AUTO_INCREMENT PRIMARY KEY");
-						header("Location: " . $_SERVER['REQUEST_URI']);
-						exit();
+						//mysqli_query($conn, "ALTER TABLE Items DROP COLUMN ItemID");
+						//mysqli_query($conn, "ALTER TABLE Items ADD ItemID INT AUTO_INCREMENT PRIMARY KEY");
+						refresh();
 			}
 			if ($action == 'Change') {
 						//validates and gets errors
 						list($description, $descriptionErr) = descriptionValid($_POST["description"]);
 						list($name, $nameErr) = nameValid($_POST["name"]);
 						list($price, $priceErr) = priceValid($_POST["price"]);
-						$visible=$_POST["visible"];
-						$type = $_POST["type"];
+                        $visible= $_POST["visible"];
+
+
+
+                        $type = $_POST["type"];
 						//checks if errors where generated
 						if ($priceErr . $nameErr . $descriptionErr == '') {
 									//checks if new image is to be uploaded
-									if (!empty($_POST['userUploadFile'])) {
+
+
+                                if ($_FILES["userUploadFile"]["error"]==4) {
 
 												//check if error for image was generated
-												    $uploadfile = addslashes(file_get_contents($_FILES['userUploadFile']['tmp_name']));
-                                                    $imageProperties = getimageSize($_FILES['userUploadFile']['tmp_name']);
+                                    mysqli_query($conn, "UPDATE Items SET Name='{$name}', Description='{$description}', Visible='{$visible}', Price='{$price}',Type='{$type}' WHERE ItemID='{$ItemID}'");
 
-															//updates all fields and refreshes
-                                                    mysqli_query($conn, "UPDATE Items SET Name='$Name', Description='$Description', Price='$Price', Visible='$visible',Photo='$uploadfile',PhotoProperties='$imageProperties', Type='$type' WHERE ItemID=$ItemID");
-                                                    refresh();
-
-									} else {
+                                } else {
 												//updates everything except image directory and refreshes
-												mysqli_query($conn, "UPDATE Items SET Name='$name', Description='$description', Visible='$visible', Price='$price',Type='$type' WHERE ItemID=$ItemID");
-												refresh();
+                                    $uploadfile = addslashes(file_get_contents($_FILES['userUploadFile']['tmp_name']));
+                                    $imageProperties = getimageSize($_FILES['userUploadFile']['tmp_name']);
+
+                                    //updates all fields and refreshes
+                                    mysqli_query($conn, "UPDATE Items SET Name='{$name}', Description='{$description}', Price='{$price}', Visible='{$visible}',Photo='{$uploadfile}',PhotoProperties='{$imageProperties}', Type='$type' WHERE ItemID='{$ItemID}'");
+
 									}
 						} else {
 									//displays errors
 									displayErr($priceErr, $nameErr, $descriptionErr);
 						}
-			}
+                refresh();
+
+            }
 			if ($action == "add") {
 						//validates and gets errors from input
 						list($Description, $descriptionErr) = descriptionValid($_POST["description"]);
 						list($Name, $nameErr) = nameValid($_POST["name"]);
 						list($Price, $priceErr) = priceValid($_POST["price"]);
+						$type=$_POST['type'];
                         $visible=$_POST["visible"];
-
-//                        $Name=$_POST["name"];
-//                        $Description=$_POST["description"];
-//                        $Price=$_POST["price"];
 
                 //checks if errors were generated
 						if ($priceErr . $nameErr . $descriptionErr == '') {
@@ -185,43 +206,47 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 //checks if tb is empty
 			//generates default value for status
-for ($x = 0; $x < count($ItemsID); $x++) {
-						//generates form for each record
-    echo '
+if($ItemsID[0]) {
+    for ($x = 0; $x < count($ItemsID); $x++) {
+        //generates form for each record
+        echo '<table class="table">
+<tr>
 	<form style="display:inline-block;" enctype="multipart/form-data" method="post" action"' . $_SERVER["PHP_SELF"] . '">	
-    <img style="display:inline-block;" width="30%" height="30%" src="data:image/jpeg;base64,'.base64_encode( $Photos[$x]).'" alt="image">
+    <td><img style="display:inline-block;" src="data:image/jpeg;base64,' . base64_encode($Photos[$x]) . '" alt="image"></td>
 
-	<input type="file" name="userUploadFile" enctype="multipart/form-data" id="userUploadFile">
-	Name: <input name="name" type="text" value="' . $Names[$x] . '">
-	Description: <input  name="description" type="text" value="' . $Descriptions[$x] . '">
-	Price: <input  name="price" type="text" value="' . $Prices[$x] . '">
-	Type:  <input  name="type" type="text" value="' . $Types[$x] . '">
-    Visible: <input name="visible" type="text" value="'.$Visible[$x].'">
+	<td><input type="file" name="userUploadFile" enctype="multipart/form-data" id="userUploadFile"></td>
+	<td>Name: <input name="name" type="text" value="' . $Names[$x] . '"></td>
+	<td>Description: <input  name="description" type="text" value="' . $Descriptions[$x] . '"></td>
+	<td>Price: <input  name="price" type="text" value="' . $Prices[$x] . '"></td>
+	<td>Type:  <input  name="type" type="text" value="' . $Types[$x] . '"></td>
+    <td><select name="visible"><option value="0"' . $NVSelected[$x] . '>Not Visible</option> <option value="1"' . $VSelected[$x] . '>Visible</option></select></td>
 	<input type="hidden" name="ItemID" value="' . $ItemsID[$x] . '">
 	
-	<input class="btn btn-primary" type="submit" name="action" value="Change">
+	<td><input class="btn btn-primary" type="submit" name="action" value="Change"></td>
 
-	<input class="btn btn-primary" type="submit" name="action" value="Delete">
-	
+	<td><input class="btn btn-primary" type="submit" name="action" value="Delete"></td>
+	</tr>
 	</form>
 ';
 
+    }
 }
 //generates form to add record	
-echo '
+echo '<tr>
 	<form style="display:inline-block; float:bottom;" enctype="multipart/form-data" method="post" action"' . $_SERVER["PHP_SELF"] . '">	
-	<input type="file" name="userUploadFile" enctype="multipart/form-data" id="userUploadFile">
-	Name: <input name="name" type="text" value="' . $nameErr . '">
-	Description: <input  name="description" type="text" value="' . $descriptionErr . '">
-	Price: <input  name="price" type="text" value="' . $priceErr . '">
-	Visible: <input name="visible" type="text" value="">
-	Type:  <input  name="type" type="text" value="">
+	<td><input type="file" name="userUploadFile" enctype="multipart/form-data" id="userUploadFile"></td>
+	<td>Name: <input name="name" type="text" value="' . $nameErr . '"></td>
+	<td>Description: <input  name="description" type="text" value="' . $descriptionErr . '"></td>
+	<td>Price: <input  name="price" type="text" value="' . $priceErr . '"></td>
+    <td><select name="visible"><option value="0">Not Visible</option> <option value="1">Visible</option></select></td>
+	<td>Type:  <input  name="type" type="text" value=""></td>
 
 
 	<input type="hidden" name="action" value="add">
-	<input class="btn btn-primary" type="submit" value="Add">
+	<td><input class="btn btn-primary" type="submit" value="Add"></td>
 	</form>
-
+	</tr>
+</table>
 	';
 //closes connection with server	
 mysqli_close($conn);
