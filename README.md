@@ -31,6 +31,18 @@ class ItemModel{
     }
 
 
+getRestaurants.php echoes all restaurants in the website in a JSON format
+
+
+getItems.php requires "$_GET" to set venueID for the query and echoes all the items in the website in a JSON format
+
+
+
+
+
+
+
+
 
 everything written here is written with case sensitivity.
 
