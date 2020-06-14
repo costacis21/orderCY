@@ -1,44 +1,17 @@
 import Foundation
 import FoundationNetworking
 
-let url = URL(string: "http://localhost/orderCY/getRestaurants.php")!
-let jsonString:String=(try(String(data: (Data(contentsOf: url)), encoding: .utf8)!))
-
-getItemsOfRestaurantInJSON(venueID:"1")
-
-func getItemsOfRestaurantInJSON(venueID:String){
-    
-    let myUrl = URL(string: "http://localhost/orderCY/getItems.php")!
-
-    var request = URLRequest(url:myUrl)
-
-    request.httpMethod = "POST"// Compose a query string
-    
-    let postString = "venueID="+venueID;
-    
-    request.httpBody = postString.data(using: String.Encoding.utf8);
-    let task = URLSession.shared.dataTask(with: request) { (data: Data?, response: URLResponse?, error: Error?) in
-    do{
-            // You can print out response object
-    print(try(String(data: Data)))
-
-    }catch{
-        print("error")
-    }
-
-    }
 
 
-        
-
-
-}
-
- func parseRestaurantJSON(_ data:Data) -> Array<RestaurantModel>{
+ func getRestaurants() -> Array<RestaurantModel>{
+     //retrieve data from site
+        let url = URL(string: "http://localhost/orderCY/getRestaurants.php")!
+        let data = try!(Data(contentsOf: url))
         
         var jsonResult = NSArray()
         var Restaurants =  Array<RestaurantModel>()
         
+        //decode data to json string
         do{
             jsonResult = try JSONSerialization.jsonObject(with: data, options:JSONSerialization.ReadingOptions.allowFragments) as! NSArray
             
@@ -72,15 +45,15 @@ func getItemsOfRestaurantInJSON(venueID:String){
             Restaurants.append(restaurant)
             
         }
-        //print(Restaurants[0].name!)
 
         return Restaurants
        
     }
 
 
- func parseItemsJSON(_ data:Data) -> Array<ItemModel>{
-        
+ func getItemsOfRestaurant(venueID:String) -> Array<ItemModel>{
+        let myUrl = URL(string: "http://localhost/orderCY/getItems.php?venueID=\(venueID)")!;
+        let data = try!(Data(contentsOf: myUrl))
         var jsonResult = NSArray()
         var items =  Array<ItemModel>()
         
@@ -123,13 +96,11 @@ func getItemsOfRestaurantInJSON(venueID:String){
             items.append(item)
             
         }
-        //print(Restaurants[0].name!)
 
         return items
        
     }
 
-//print(jsonString)
 
 
 class RestaurantModel {
@@ -151,10 +122,7 @@ class ItemModel{
 
 class RestaurantItemsModel{
     var restaurant:RestaurantModel?
-    var items: ItemModel?
+    var items: Array<ItemModel>?
 }
 
-
-
-  
 
