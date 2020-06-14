@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>order-portal</title>
+    <title>Restaurants</title>
     <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="assets/css/Navigation-Clean.css">
     <link rel="stylesheet" href="assets/css/styles.css">
@@ -13,7 +13,7 @@
 <body>
     <div>
         <nav class="navbar navbar-light navbar-expand-md navigation-clean">
-            <div class="container"><a class="navbar-brand" href="#">Order-portal</a><button class="navbar-toggler" data-toggle="collapse" data-target="#navcol-1"><span class="sr-only">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
+            <div class="container"><a class="navbar-brand" href="#">Restaurant Portal</a><button class="navbar-toggler" data-toggle="collapse" data-target="#navcol-1"><span class="sr-only">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
                 <div class="collapse navbar-collapse"
                     id="navcol-1">
                     <ul class="nav navbar-nav ml-auto">
@@ -27,17 +27,22 @@
     </div>
 	<?php
 $servername = "localhost";
-$username = "costacis";
-$password = "mynameisjeff69";
-$dbname="ordercy";
+$username = "root";
+$password = "";
+$dbname="orderCy";
 include('dbfunctions.php');
 include('validation.php');
 
 $conn = mysqli_connect($servername, $username, $password, $dbname);
+    ini_set('log_errors',1);
+    mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+$Names       = array('');
+$VenuesID   = array();
+$Cities = array('');
+$nameErr = $cityErr = '';
 
 
-
-$sql = "SELECT * FROM restaurants";
+$sql = "SELECT * FROM Restaurants";
 $result = mysqli_query($conn, $sql);
 $x=0;
 while ($row = mysqli_fetch_assoc($result)) {
@@ -50,65 +55,137 @@ while ($row = mysqli_fetch_assoc($result)) {
     $x++;
     }
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    list($Name, $nameErr) = nameValid($_POST["name"]);
-    list($City, $cityErr) = nameValid($_POST["city"]);
-    $Openhour=$_POST["openhour"];
-    $Closehour=$_POST["closehour"];
+        if($_POST["action"]=="add"){
+            //list($Name, $nameErr) = nameValid($_POST["name"]);
+            //list($City, $cityErr) = cityValid($_POST["city"]);
+            $Name =$_POST["name"];
+            $City =$_POST["city"];
+            if(isset($_POST["openhour"])){
+                $Openhour=date("H:i",strtotime($_POST["openhour"]));
+            }else{
+                $Openhour=date("H:i",1200);
+            }
+            if(isset($_POST["closehour"])){
+                $Closehour=date("H:i",strtotime($_POST["closehour"]));
+            }else{
+                $Closehour=date("H:i",0000);
+            }
 
-    //                        $Name=$_POST["name"];
-    //                        $Description=$_POST["description"];
-    //                        $Price=$_POST["price"];
+            //                        $Name=$_POST["name"];
+            //                        $Description=$_POST["description"];
+            //                        $Price=$_POST["price"];
 
-    //checks if errors were generated
-    if ($nameErr . $cityErr == '') {
+            //checks if errors were generated
+            if ($nameErr . $cityErr == '') {
+                $newVenueID=random_str(255);
+                if ($_POST['userUploadFile']==4) {
+                    mysqli_query($conn, "INSERT INTO Restaurants (VenueID, Name, City, Openhour, Closehour) VALUES('{$newVenueID}','{$Name}', '{$City}', '{$Openhour}', '{$Closehour}') ");
 
-        if (!empty($_POST['userUploadFile'])) {
-            $Logo = addslashes(file_get_contents($_FILES['userUploadFile']['tmp_name']));
-            $LogoProperties = getimageSize($_FILES['userUploadFile']['tmp_name']);
-            mysqli_query($conn, "INSERT INTO restaurants (Name, City, Openhour, Closehour, LogoProperties,Logo) VALUES('{$Name}', '{$City}', '{$Openhour}', '{$Closehour}', '{$LogoProperties}','{$Logo}') ");
-        }else {
+                }else {
+                    $Logo = addslashes(file_get_contents($_FILES["userUploadFile"]["tmp_name"]));
+                    $LogoProperties = getimageSize($_FILES["userUploadFile"]["tmp_name"]);
+                    mysqli_query($conn, "INSERT INTO Restaurants (VenueID,Name, City, Openhour, Closehour, LogoProperties,Logo) VALUES('{$newVenueID}','{$Name}', '{$City}', '{$Openhour}', '{$Closehour}', '{$LogoProperties}','{$Logo}') ");
 
-
-            mysqli_query($conn, "INSERT INTO restaurants (Name, City, Openhour, Closehour) VALUES('{$Name}', '{$City}', '{$Openhour}', '{$Closehour}') ");
+                }
+                }else{
+                displayErr($nameErr,$cityErr);
+            }
+            refresh();
 
         }
-        refresh();
-        }
+         if($_POST["action"]=="delete"){
+             $VenueID=$_POST["VenueID"];
+             mysqli_query($conn, "DELETE FROM Restaurants WHERE VenueID='{$VenueID}' ");
+             refresh();
+         }
+         if($_POST["action"]=="edit") {
+             list($Name, $nameErr) = nameValid($_POST["name"]);
+             list($City, $cityErr) = nameValid($_POST["city"]);
+             if(isset($_POST["openhour"])){
+                 $Openhour=date("H:i",strtotime($_POST["openhour"]));
+             }else{
+                 $Openhour=date("H:i",1200);
+             }
+             if(isset($_POST["closehour"])){
+                 $Closehour=date("H:i",strtotime($_POST["closehour"]));
+             }else{
+                 $Closehour=date("H:i",0000);
+             }
+
+             //                        $Name=$_POST["name"];
+             //                        $Description=$_POST["description"];
+             //                        $Price=$_POST["price"];
+
+             //checks if errors were generated
+             if ($nameErr . $cityErr == '') {
+                 $VenueID=$_POST["VenueID"];
+                 if ($_FILES["userUploadFile"]["error"]==4) {
+                     mysqli_query($conn, "UPDATE Restaurants SET Name='{$Name}', City='{$City}', Openhour='{$Openhour}', Closehour='{$Closehour}' WHERE VenueID='{$VenueID}' ");
+
+                 }else {
+                     $Logo = addslashes(file_get_contents($_FILES["userUploadFile"]["tmp_name"]));
+                     $LogoProperties = getimageSize($_FILES["userUploadFile"]["tmp_name"]);
+                     mysqli_query($conn, "UPDATE Restaurants SET Name='{$Name}', City='{$City}', Openhour='{$Openhour}', Closehour='{$Closehour}', LogoProperties='{$LogoProperties}', Logo='{$Logo}' WHERE VenueID='{$VenueID}' ");
+
+
+
+                 }
+             }else{
+                 displayErr($nameErr,$cityErr);
+             }
+             refresh();
+
+         }
+
     }
 
 
     for ($x = 0; $x < count($VenuesID); $x++) {
 						//generates form for each record
-						echo '
-	<img style="display:inline-block;" width="30%" height="30%" src="data:image/jpeg;base64,'.base64_encode( $Logos[$x]).'" alt="image">
+						echo '<tr>
 	<form style="display:inline-block;" enctype="multipart/form-data" method="get" action="products.php">	
-    
-	<input type="file" name="userUploadFile" enctype="multipart/form-data" id="userUploadFile">
-	Name: <input name="name" type="text" value="' . $Names[$x] . '">
-	City: <input  name="city" type="text" value="' . $Cities[$x] . '">
-	Openhours: <input  name="openhour" type="text" value="' . $Openhours[$x] . '">
-    Closehours: <input name="closehour" type="text" value="'.$Closehours[$x].'">
-
+	<table class="table">
+    <td><img style="display:inline-block;" width="10%" height="10%" src="data:image/jpeg;base64,'.base64_encode( $Logos[$x]).'" alt="image"></td>	
+    <input name="name" type="hidden" value="' . $Names[$x] . '"></td>
+	<input  name="city" type="hidden" value="' . $Cities[$x] . '"></td>
+	<input  name="openhour" type="hidden" value="' . $Openhours[$x] . '"></td>
+    <input name="closehour" type="hidden" value="'.$Closehours[$x].'"></td>
 	<input type="hidden" name="VenueID" value="' . $VenuesID[$x] . '">
-	<input class="btn btn-primary" type="submit" value="View Products">
-
+	<td><input class="btn btn-primary" type="submit" value="View Products"></td>
+	</form>
+	
+	<form method="post" enctype="multipart/form-data" action="""'.$_SERVER["PHP_SELF"].'">
+	<td><input type="file" name="userUploadFile" enctype="multipart/form-data" id="userUploadFile"></td>
+	<input type="hidden" name="VenueID" value="' . $VenuesID[$x] . '">
+	<td>Name: <input name="name" type="text" value="' . $Names[$x] . '"></td>
+	<td>City: <input  name="city" type="text" value="' . $Cities[$x] . '"></td>
+	<td>Openhours: <input  name="openhour" type="time" value="' . $Openhours[$x] . '"></td>
+    <td>Closehours: <input name="closehour" type="time" value="'.$Closehours[$x].'"></td>
+	<td><input class="btn btn-primary" type="submit" name="action" value="edit"></td>
 	
 	</form>
+	
+	<form method="post" action="'.$_SERVER["PHP_SELF"].'">
+	<input type="hidden" name="VenueID" value="' . $VenuesID[$x] . '">
+	<td><input class="btn btn-primary" type="submit" name="action" value="delete"></td>
+	</form>
+	</tr>
+	
 ';
     }
 
 //generates form to add record
-echo '
+echo '<tr>
 	<form style="display:inline-block; float:bottom;" enctype="multipart/form-data" method="post" action"' . $_SERVER["PHP_SELF"] . '">	
-	<input type="file" name="userUploadFile" enctype="multipart/form-data" id="userUploadFile">
-    Name: <input name="name" type="text" value="">
-	City: <input  name="city" type="text" value="">
-	Openhours: <input  name="openhour" type="text" value="">
-    Closehours: <input name="closehour" type="text" value="">
-
-	<input type="hidden" name="VenueID" value="">
+	
+	<td><input type="file" name="userUploadFile" enctype="multipart/form-data" id="userUploadFile"></td>
+    <td>Name: <input name="name" type="text" value=""></td>
+	<td>City: <input  name="city" type="text" value=""></td>
+	<td>Openhours: <input  name="openhour" type="time" value=""></td>
+    <td>Closehours: <input name="closehour" type="time" value=""></td>
 	<input type="hidden" name="action" value="add">
-	<input class="btn btn-primary" type="submit" value="Add">
+	<td><input class="btn btn-primary" type="submit" value="Add"></td>
+	</table>
 	</form>
 
 	';

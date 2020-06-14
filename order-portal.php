@@ -39,7 +39,8 @@ include 'dbfunctions.php';
 $servername = "localhost";
 $username = "costacis";
 $password = "mynameisjeff69";
-$dbname="profusiondb";
+$dbname="orderCy";
+
 
 //creates connection with server
 $conn = mysqli_connect($servername, $username, $password);
@@ -51,27 +52,21 @@ createDB($conn,$dbname);
 //creates connection with db
 $conn = mysqli_connect($servername, $username, $password, $dbname);
 //checks if table exists and creates it if it doesn't
-if(!checkTables($conn,$dbname,'tborders')){
-	mysqli_query($conn,"CREATE TABLE tborders(productID INT NOT NULL, customerID INT NOT NULL, qty INT NOT NULL, name TINYTEXT NOT NULL REFERENCES tbproducts(name), status TINYTEXT, price FLOAT NOT NULL REFERENCES tbproducts(price), total FLOAT NOT NULL, FOREIGN KEY (customerID) REFERENCES tbcustomers(customerID), FOREIGN KEY (productID) REFERENCES tbproducts(productID))");	
-	}
-if(!checkTables($conn,$dbname,'tbcustomers')){
-	mysqli_query($conn,"CREATE TABLE tbcustomers(customerID INT NOT NULL AUTO_INCREMENT,name TINYTEXT, email TINYTEXT NOT NULL, addr TINYTEXT NOT NULL, phoNO INT NOT NULL, description TEXT, PRIMARY KEY (customerID))");	
-	}	
+
 
 if($_SERVER['REQUEST_METHOD']=='POST'){  
 
 //interprets action and id for which to perform the action
 $action=$_POST["action"];
 $customerID=$_POST["customerID"];
-$productID=$_POST["productID"];
+
 
 if($action == 'del'){
 	
 //deletes from tb
-$sqlquerry="DELETE FROM tborders WHERE customerID={$customerID} AND productID={$productID}";
+$sqlquerry="DELETE FROM CustomerOrders WHERE OrderID={OrderID}";
 mysqli_query($conn,$sqlquerry);
-$sqlquerry="DELETE FROM tbcustomers WHERE customerID={$customerID}";
-mysqli_query($conn,$sqlquerry);
+
 
 //refreshes site
 header("Location: " . $_SERVER['REQUEST_URI']);
@@ -99,41 +94,33 @@ exit();
 	
 }
 
+$venueID=$_GET['venueID'];
 
 
 
-
-$sql = "SELECT * FROM tborders";
+$sql = "SELECT Items.Name, CustomerOrders.TableNo FROM Items, CustomerOrders INNER JOIN CustomerOrders ON CustomerOrders.OrderID=Orders.OrderID WHERE VenueID='{$venueID}';";
 $result = mysqli_query($conn, $sql);
 if (is_numeric(mysqli_num_rows($result))) {
 
 
 
 
-		echo ' <div class="table-responsive"><table class="table"> <thead><tr><th>Name</th>  <th>Price</th>  <th>Quantity</th>  <th>Total price</th> <th> Status </th> <th>Customer Info</th> <th>Action</th> </tr> </thead> <tbody>';
+		echo ' <div class="table-responsive"><table class="table"> <thead><tr><th>Table</th>  <th>Item</th>  <th>Customer Info</th> <th>Action</th> </tr> </thead> <tbody>';
 
     // output data and actions of each record
     while($row = mysqli_fetch_assoc($result)) {
 		
-			if($row["status"]=="Shipped"){
-			$changestatus="Processing";
-			}
-			else{
-			$changestatus="Shipped";
 
-			}
 	
 		
         echo '<tr> 
-		<td>'.$row["name"].'</td> 
-		<td>&euro;' . $row["price"] . '</td> 
-		<td>x '.$row["qty"]. '</td>
-		<td>=' .$row["total"]. ' </td>
-		<td>'.$row["status"].'</td>
+		<td>'.$row["TableNo"].'</td> 
+		<td>&euro;' . $row["Name"] . '</td> 
+		
 		<td> 
 			<button onclick="toggleCustomerInfo('.$row["customerID"].')">Display customer info</button>
 			<div style="Display:none" id="'.$row["customerID"].'">';
-			$custresult = mysqli_query($conn, "SELECT * FROM tbcustomers WHERE customerID={$row["customerID"]}");
+			$custresult = mysqli_query($conn, "SELECT * FROM CustomerOrders WHERE OrderID={$row["customerID"]}");
 				while($custrow = mysqli_fetch_assoc($custresult)) {
 						echo'   Name: '.$custrow["name"].'<br>
 								Email: '.$custrow["email"].'<br>

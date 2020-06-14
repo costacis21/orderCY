@@ -1,4 +1,4 @@
-<?php
+vm<?php
 //sanitizes input
 function test_input($data) {
     $data = trim($data);
@@ -22,6 +22,23 @@ function nameValid($name) {
     return array(
         $name,
         $nameErr
+    );
+}
+
+function cityValid($city) {
+    $nameErr = '';
+    if (empty($City)) {
+        $cityErr = "city is required";
+    } else {
+        $name = test_input($city);
+        if (!preg_match("/^[a-zA-Z ]*$/", $city)) {
+            $city = "For city only letters and white space allowed";
+        }
+    }
+    //returns array with sanitized input and errors
+    return array(
+        $city,
+        $cityErr
     );
 }
 //validates and generates errors
@@ -77,4 +94,22 @@ function imgValid($userfile_tmp_name, $userfile_size, $uploadfile) {
         $uploadstatus
     );
 }
+
+//prompt for errors and reload site
+function displayErr($priceErr = '', $imgErr = '', $descriptionErr = '', $nameErr = '')
+{
+    echo '<script>
+		if("' . $imgErr . $priceErr . $nameErr . $descriptionErr . '"!==""){
+			pressed=confirm("' . $imgErr . $priceErr . $nameErr . $descriptionErr . '");
+			if(pressed==true || pressed==false){
+				window.location="' . $_SERVER['REQUEST_URI'] . '";
+			}
+		}else{
+			window.location="' . $_SERVER['REQUEST_URI'] . '";
+
+		}
+			
+			</script>';
+}
+
 ?>
