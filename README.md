@@ -18,7 +18,7 @@ class RestaurantModel {
     var city: String?
     var openhour: String?
     var venueID: String?    
-}
+    }
  
 class ItemModel{
     var name :String?
@@ -28,7 +28,7 @@ class ItemModel{
     var itemID :String?
     var venueID :String?
     var visible :String?
-}
+    }
 
 
 
