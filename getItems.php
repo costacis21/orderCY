@@ -8,11 +8,11 @@ if (mysqli_connect_errno()) {
     echo "Failed to connect to MySQL: " . mysqli_connect_error();
 }
 $json_array = array();
-if(isset($_REQUEST["venuID"])){
-    $requestVenueID= $_REQUEST["venueID"];
+//if(isset($_POST["venueID"])){
+    $requestVenueID= $_GET["venueID"];
 
     // month value sent from the client with a POST request
-    $sql = "SELECT * FROM Items WHERE VenueID = {'$requestVenueID'}";
+    $sql = "SELECT * FROM Items WHERE VenueID = {$requestVenueID}";
     $result = mysqli_query($con, $sql);
 
     $Photos = array();
@@ -32,7 +32,7 @@ if(isset($_REQUEST["venuID"])){
         $Photos[$x] = $row['Photo'];
 
         $x++;
-}
+//}
 }
 
 

@@ -234,6 +234,6 @@ let customerOrder = CustomerOrderModel(Customer: customer, Orders: order)
 sumbmitOrder(CustomerOrder: customerOrder)
 
 
-
+let restaurants: Array<RestaurantModel> = getRestaurants()
 
 
