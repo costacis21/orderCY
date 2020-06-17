@@ -3,6 +3,8 @@ import FoundationNetworking
 
 
 
+
+
  func getRestaurants() -> Array<RestaurantModel>{
      //retrieve data from site
         let url = URL(string: "http://localhost/orderCY/getRestaurants.php")!
@@ -101,6 +103,67 @@ import FoundationNetworking
        
     }
 
+    func sumbmitOrder(CustomerOrder:CustomerOrderModel){
+        //var urlData:String
+
+        // for item in CustomerOrder.itemOrders {
+        //     urlData+=""
+
+        // }
+
+    // let data = NSJSONSerialization.dataWithJSONObject(CustomerOrder.itemOrders, options: nil, error: nil)
+    // let string = NSString(data: data!, encoding: NSUTF8StringEncoding)
+    print(encodeCustomerOrderModel(customerToEncode: CustomerOrder.customer!, orderToEncode: CustomerOrder.itemOrders!))
+
+
+
+    }
+
+    func encodeCustomerOrderModel(customerToEncode: CustomerModel, orderToEncode: Array<OrderModel>) -> String{
+    
+        struct customerModel: Codable {
+            var tableNo: String?
+            var telNo: String?
+            var venueID: String?
+        }
+
+        struct orderModel: Codable{
+            var itemID: String?
+            var comment: String?
+            var commentQty: String?
+            var quantity: String?
+        }
+
+        struct customerordermodel: Codable{
+            var customer: customerModel
+            var itemOrders: Array<orderModel>
+        }
+
+        var customer: customerModel! = customerModel()
+
+        customer.tableNo = customerToEncode.tableNo
+        customer.telNo = customerToEncode.telNo
+        customer.venueID = customerToEncode.venueID
+        
+        var order : Array<orderModel>! = Array(arrayLiteral: orderModel())
+        var i : Int
+        i = 0
+        for item in orderToEncode{
+            order[i].itemID = orderToEncode[i].itemID
+            order[i].comment = orderToEncode[i].comment
+            order[i].commentQty = orderToEncode[i].commentQty
+            order[i].quantity = orderToEncode[i].quantity
+            i+=1
+        }
+
+
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .prettyPrinted
+
+        let data = try! (encoder.encode(customer))
+        return (String(data: data, encoding: .utf8)!)
+    }
+
 
 
 class RestaurantModel {
@@ -120,9 +183,57 @@ class ItemModel{
     var visible :String?
 }
 
+class CustomerModel{
+    var tableNo: String?
+    var telNo: String?
+    var venueID: String?
+}
+
+class OrderModel: Codable{
+    var itemID: String?
+    var comment: String?
+    var commentQty: String?
+    var quantity: String?
+
+}
+
+class CustomerOrderModel{
+        var customer: CustomerModel?
+        var itemOrders: Array<OrderModel>?
+
+        init(Customer: CustomerModel, Orders: Array<OrderModel>){
+            customer=Customer
+            itemOrders=Orders
+        }
+}
+
 class RestaurantItemsModel{
     var restaurant:RestaurantModel?
     var items: Array<ItemModel>?
 }
+
+
+var items : Array<ItemModel>! = Array(arrayLiteral: ItemModel())
+
+items = getItemsOfRestaurant(venueID:"1");
+
+var order : Array<OrderModel> = Array(arrayLiteral: OrderModel())
+
+order[0].itemID = items[0].itemID
+order[0].comment = "bla"
+order[0].quantity = "bli"
+order[0].commentQty = "blo"
+
+var customer : CustomerModel! = CustomerModel()
+
+customer.tableNo = "10"
+customer.telNo = "99938434"
+customer.venueID = "1"
+
+let customerOrder = CustomerOrderModel(Customer: customer, Orders: order) 
+sumbmitOrder(CustomerOrder: customerOrder)
+
+
+
 
 
