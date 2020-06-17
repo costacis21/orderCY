@@ -7,7 +7,7 @@ import FoundationNetworking
 
  func getRestaurants() -> Array<RestaurantModel>{
      //retrieve data from site
-        let url = URL(string: "http://localhost/orderCY/getRestaurants.php")!
+        let url = URL(string: "https://ordercy.a2hosted.com/orderCY/getRestaurants.php")!
         let data = try!(Data(contentsOf: url))
         
         var jsonResult = NSArray()
@@ -104,6 +104,7 @@ import FoundationNetworking
     }
 
     func sumbmitOrder(CustomerOrder:CustomerOrderModel){
+        
         //var urlData:String
 
         // for item in CustomerOrder.itemOrders {
@@ -113,7 +114,22 @@ import FoundationNetworking
 
     // let data = NSJSONSerialization.dataWithJSONObject(CustomerOrder.itemOrders, options: nil, error: nil)
     // let string = NSString(data: data!, encoding: NSUTF8StringEncoding)
-    print(encodeCustomerOrderModel(customerToEncode: CustomerOrder.customer!, orderToEncode: CustomerOrder.itemOrders!))
+    let customerorder : String = encodeCustomerOrderModel(customerToEncode: CustomerOrder.customer!, orderToEncode: CustomerOrder.itemOrders!)
+    let escapedString = customerorder.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)
+
+    //let urlWithData : String = "http://localhost/orderCY/insertOrder.php?venueID=\(escapedString)"
+    var urlQueryItem = URLQueryItem(name: "order", value: customerorder)
+    var urlComponents = URLComponents()
+    urlComponents.scheme = "http"
+    urlComponents.host = "localhost"
+    urlComponents.path = "/orderCY/insertOrder.php"
+    urlComponents.queryItems = [urlQueryItem]
+    //print(urlComponents.url?.absoluteString)
+    let myUrl = URL(string: urlComponents.url!.absoluteString)!
+    let data = try!(Data(contentsOf: myUrl))
+    print((String(data: data, encoding: .utf8))!)
+    //print(escapedString)
+    print(customerorder)
 
 
 
@@ -146,22 +162,24 @@ import FoundationNetworking
         customer.venueID = customerToEncode.venueID
         
         var order : Array<orderModel>! = Array(arrayLiteral: orderModel())
-        var i : Int
-        i = 0
+        var orderItem: orderModel = orderModel()
+
         for item in orderToEncode{
-            order[i].itemID = orderToEncode[i].itemID
-            order[i].comment = orderToEncode[i].comment
-            order[i].commentQty = orderToEncode[i].commentQty
-            order[i].quantity = orderToEncode[i].quantity
-            i+=1
+            orderItem.itemID = item.itemID
+            orderItem.comment = item.comment
+            orderItem.commentQty = item.commentQty
+            orderItem.quantity = item.quantity
+            order.append(orderItem)
         }
 
 
         let encoder = JSONEncoder()
-        encoder.outputFormatting = .prettyPrinted
+        //encoder.outputFormatting = .prettyPrinted
 
-        let data = try! (encoder.encode(customer))
-        return (String(data: data, encoding: .utf8)!)
+        let customerData = try! (encoder.encode(customer))
+        let orderData = try! (encoder.encode(order))
+
+        return ((String(data: customerData, encoding: .utf8)!)+(String(data: orderData, encoding: .utf8)!))
     }
 
 
@@ -217,12 +235,26 @@ var items : Array<ItemModel>! = Array(arrayLiteral: ItemModel())
 
 items = getItemsOfRestaurant(venueID:"1");
 
-var order : Array<OrderModel> = Array(arrayLiteral: OrderModel())
+var order : Array<OrderModel>! = Array(arrayLiteral: OrderModel())
 
-order[0].itemID = items[0].itemID
-order[0].comment = "bla"
-order[0].quantity = "bli"
-order[0].commentQty = "blo"
+var orderItem: OrderModel = OrderModel()
+var orderItem1: OrderModel = OrderModel()
+
+
+orderItem.itemID = items[0].itemID
+orderItem.comment = "bla"
+orderItem.quantity = "bli"
+orderItem.commentQty = "blo"
+order.append(orderItem)
+
+orderItem1.itemID = items[1].itemID
+orderItem1.comment = "bdsdfsd"
+orderItem1.quantity = "bsdfsdf"
+orderItem1.commentQty = "bsdfsdf"
+order.append(orderItem1)
+
+
+
 
 var customer : CustomerModel! = CustomerModel()
 
@@ -230,10 +262,11 @@ customer.tableNo = "10"
 customer.telNo = "99938434"
 customer.venueID = "1"
 
+
 let customerOrder = CustomerOrderModel(Customer: customer, Orders: order) 
+
+
 sumbmitOrder(CustomerOrder: customerOrder)
 
-
-let restaurants: Array<RestaurantModel> = getRestaurants()
 
 
