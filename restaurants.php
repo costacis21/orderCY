@@ -30,12 +30,16 @@ $servername = "localhost";
 $username = "root";
 $password = "";
 $dbname="orderCy";
+//    $servername="ordercy.a2hosted.com";
+//    $username = "ordercya_root";
+//    $password = "pu043=+JHQA!";
+//    $dbname="ordercya_orderCy";
+
 include('dbfunctions.php');
 include('validation.php');
 
-$conn = mysqli_connect($servername, $username, $password, $dbname);
-    ini_set('log_errors',1);
-    mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+$conn = new mysqli($servername, $username, $password, $dbname);
+    ini_set('log_errors',1);mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 $Names       = array('');
 $VenuesID   = array();
 $Cities = array('');
@@ -43,9 +47,9 @@ $nameErr = $cityErr = '';
 
 
 $sql = "SELECT * FROM Restaurants";
-$result = mysqli_query($conn, $sql);
+$result = $conn->query($sql);
 $x=0;
-while ($row = mysqli_fetch_assoc($result)) {
+while ($row = $result->fetch_assoc()) {
     $Names[$x]        = $row['Name'];
     $VenuesID[$x]   = $row['VenueID'];
     $Cities[$x] = $row['City'];
