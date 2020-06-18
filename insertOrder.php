@@ -1,22 +1,58 @@
 <?php
 
 // Create connection to database
-//$con = mysqli_connect("localhost", "root", "", "orderCy");
 //
 //// Check connection
 //if (mysqli_connect_errno()) {
 //    echo "Failed to connect to MySQL: " . mysqli_connect_error();
 //}
-$json_array = array();
-//if(isset($_POST["venueID"])){
+$conn = new mysqli("localhost", "root", "", "orderCy");
+
 $order= $_GET["order"];
-$order='{"telNo":"99938434","tableNo":"10","venueID":"1"}[{},{},{"comment":"bla","quantity":"bli","itemID":"1","commentQty":"blo"},{"comment":"bdsdfsd","quantity":"bsdfsdf","commentQty":"bsdfsdf","itemID":"2"}]';
 $customer = substr($order, 0, strpos($order, '}')+1);
 $itemOrders = substr($order, strpos($order, '}')+1, strlen($order));
 $decodedOrder = json_decode($itemOrders,true);
+$decodedCustomer = json_decode($customer,true);
+//echo'<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>';
+//echo'<h></h>';
+$customersql="INSERT INTO CustomerOrders (TableNo,TelNo,VenueID) VALUES ({$decodedCustomer['tableNo']},{$decodedCustomer['telNo']},'{$decodedCustomer['venueID']}');";
+$orderIDsql="SET @orderID = LAST_INSERT_ID();";
+$ordersql = "";
 
-echo $decodedOrder[0]["comment"];
+if ($conn->query($customersql) == TRUE) {
+    echo "New record created successfully";
+} else {
+    echo "Error: ". $conn->error;
+}
+if ($conn->query($orderIDsql) == TRUE) {
+    echo "New record created successfully";
+} else {
+    echo "Error: ". $conn->error;
+}
 
+for($i=2;$i<count($decodedOrder);$i++) {
+    $comment=$decodedOrder[$i]['comment'];
+    $commentQty=$decodedOrder[$i]['commentQty'];
+    $itemID=$decodedOrder[$i]['itemID'];
+    $quantity=$decodedOrder[$i]['quantity'];
+    $ordersql= "INSERT INTO Orders (Comments, CommentQty, ItemID, OrderID, Quantity) VALUES ('$comment', $commentQty, '$itemID', @orderID, $quantity);";
+    if ($conn->query($ordersql) == TRUE) {
+        echo "New record created successfully";
+    } else {
+        echo "Error: ". $conn->error;
+    }
+}
+
+//echo $customersql.$ordersql;
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+
+
+
+$conn->close();
 
 
 // month value sent from the client with a POST request

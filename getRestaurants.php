@@ -1,6 +1,6 @@
 <?php
 // Create connection to database
-$con=mysqli_connect("localhost","root","","orderCy");
+$conn=new mysqli("localhost","root","","orderCy");
 
 // Check connection
 if (mysqli_connect_errno())
@@ -10,13 +10,13 @@ if (mysqli_connect_errno())
 
 // month value sent from the client with a POST request
 $sql = "SELECT * FROM Restaurants";
-$result = mysqli_query($con, $sql);
+$result = $conn->query($sql);
 $json_array = array();
 $Logos=array();
 $x=0;
 $json_array=array();
 // Prepares all the results to be encoded in a JSON
-while ($row = mysqli_fetch_assoc($result)) {
+while ($row = $result->fetch_assoc()) {
     $restaurant=array(  "Name"=>$row['Name'],
                         "VenueID"=>$row['VenueID'],
                         "City"=>$row['City'],
@@ -33,5 +33,5 @@ while ($row = mysqli_fetch_assoc($result)) {
 
 // encodes array with results from database
 echo json_encode($json_array);
-mysqli_close($con);
+mysqli_close($conn);
 ?>

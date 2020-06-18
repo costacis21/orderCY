@@ -39,7 +39,7 @@ include('dbfunctions.php');
 include('validation.php');
 
 $conn = new mysqli($servername, $username, $password, $dbname);
-    ini_set('log_errors',1);mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+ini_set('log_errors',1);mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 $Names       = array('');
 $VenuesID   = array();
 $Cities = array('');
