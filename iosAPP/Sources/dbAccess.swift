@@ -3,8 +3,6 @@ import FoundationNetworking
 
 
 
-
-
  func getRestaurants() -> Array<RestaurantModel>{
      //retrieve data from site
         let url = URL(string: "https://ordercy.a2hosted.com/orderCY/getRestaurants.php")!
@@ -54,7 +52,7 @@ import FoundationNetworking
 
 
  func getItemsOfRestaurant(venueID:String) -> Array<ItemModel>{
-        let myUrl = URL(string: "http://localhost/orderCY/getItems.php?venueID=\(venueID)")!;
+        let myUrl = URL(string: "https://ordercy.a2hosted.com/orderCY/getItems.php?venueID=\(venueID)")!;
         let data = try!(Data(contentsOf: myUrl))
         var jsonResult = NSArray()
         var items =  Array<ItemModel>()
@@ -103,34 +101,45 @@ import FoundationNetworking
        
     }
 
+
+
+
+    func getItemByID(itemID: String, itemArray: Array<ItemModel>)->ItemModel{
+        var nullItem : ItemModel = ItemModel() //= ItemModel(itemID:"",type:"", price:"", name:"", venueID:"", visible:"", description: "" )
+        for item in itemArray{
+            if item.itemID == itemID{
+                return item
+            }
+        }
+        return nullItem
+
+    }
+
     func sumbmitOrder(CustomerOrder:CustomerOrderModel){
         
-        //var urlData:String
-
-        // for item in CustomerOrder.itemOrders {
-        //     urlData+=""
-
-        // }
-
-    // let data = NSJSONSerialization.dataWithJSONObject(CustomerOrder.itemOrders, options: nil, error: nil)
-    // let string = NSString(data: data!, encoding: NSUTF8StringEncoding)
     let customerorder : String = encodeCustomerOrderModel(customerToEncode: CustomerOrder.customer!, orderToEncode: CustomerOrder.itemOrders!)
     let escapedString = customerorder.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)
 
-    //let urlWithData : String = "http://localhost/orderCY/insertOrder.php?venueID=\(escapedString)"
     var urlQueryItem = URLQueryItem(name: "order", value: customerorder)
     var urlComponents = URLComponents()
     urlComponents.scheme = "http"
     urlComponents.host = "localhost"
     urlComponents.path = "/orderCY/insertOrder.php"
     urlComponents.queryItems = [urlQueryItem]
-    //print(urlComponents.url?.absoluteString)
-    let myUrl = URL(string: urlComponents.url!.absoluteString)!
-    let data = try!(Data(contentsOf: myUrl))
-    print((String(data: data, encoding: .utf8))!)
-    //print(escapedString)
-    print(customerorder)
-
+    
+    let myUrl = URL(string: urlComponents.url!.absoluteString)
+    if let url = myUrl {
+    do {
+        let contents = try String(contentsOf: url,encoding: .utf8)
+        print(contents)
+    } catch {
+        // contents could not be loaded
+        print("contents not loaded \(error)")
+    }
+    } else {
+        // the URL was bad!
+        print("url was bad")
+    }
 
 
     }
@@ -230,8 +239,8 @@ class RestaurantItemsModel{
     var items: Array<ItemModel>?
 }
 
-
-var items : Array<ItemModel>! = Array(arrayLiteral: ItemModel())
+//Testing
+/* var items : Array<ItemModel>! = Array(arrayLiteral: ItemModel())
 
 items = getItemsOfRestaurant(venueID:"1");
 
@@ -242,15 +251,15 @@ var orderItem1: OrderModel = OrderModel()
 
 
 orderItem.itemID = items[0].itemID
-orderItem.comment = "bla"
-orderItem.quantity = "bli"
-orderItem.commentQty = "blo"
+orderItem.comment = "dfsd"
+orderItem.quantity = "34"
+orderItem.commentQty = "54"
 order.append(orderItem)
 
 orderItem1.itemID = items[1].itemID
 orderItem1.comment = "bdsdfsd"
-orderItem1.quantity = "bsdfsdf"
-orderItem1.commentQty = "bsdfsdf"
+orderItem1.quantity = "32"
+orderItem1.commentQty = "124"
 order.append(orderItem1)
 
 
@@ -267,6 +276,8 @@ let customerOrder = CustomerOrderModel(Customer: customer, Orders: order)
 
 
 sumbmitOrder(CustomerOrder: customerOrder)
+ print(getItemByID(itemID:"2", itemArray:items).name)
+*/
 
 
 
