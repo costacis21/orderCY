@@ -122,8 +122,8 @@ import FoundationNetworking
 
     var urlQueryItem = URLQueryItem(name: "order", value: customerorder)
     var urlComponents = URLComponents()
-    urlComponents.scheme = "http"
-    urlComponents.host = "localhost"
+    urlComponents.scheme = "https"
+    urlComponents.host = "ordercy.a2hosted.com"
     urlComponents.path = "/orderCY/insertOrder.php"
     urlComponents.queryItems = [urlQueryItem]
     
