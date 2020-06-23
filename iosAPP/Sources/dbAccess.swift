@@ -122,8 +122,8 @@ import FoundationNetworking
 
     var urlQueryItem = URLQueryItem(name: "order", value: customerorder)
     var urlComponents = URLComponents()
-    urlComponents.scheme = "https"
-    urlComponents.host = "ordercy.a2hosted.com"
+    urlComponents.scheme = "http"
+    urlComponents.host = "localhost"
     urlComponents.path = "/orderCY/insertOrder.php"
     urlComponents.queryItems = [urlQueryItem]
     
@@ -240,7 +240,9 @@ class RestaurantItemsModel{
 }
 
 //Testing
-/* var items : Array<ItemModel>! = Array(arrayLiteral: ItemModel())
+
+/*
+ var items : Array<ItemModel>! = Array(arrayLiteral: ItemModel())
 
 items = getItemsOfRestaurant(venueID:"1");
 
@@ -276,8 +278,4 @@ let customerOrder = CustomerOrderModel(Customer: customer, Orders: order)
 
 
 sumbmitOrder(CustomerOrder: customerOrder)
- print(getItemByID(itemID:"2", itemArray:items).name)
-*/
-
-
-
+print(getItemByID(itemID:"2", itemArray:items).name)*/
