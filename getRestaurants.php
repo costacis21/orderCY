@@ -1,7 +1,12 @@
 <?php
 // Create connection to database
-$conn=new mysqli("localhost","root","","orderCy");
+$servername="ordercy.a2hosted.com";
+$username = "ordercya_root";
+$password = "pu043=+JHQA!";
+$dbname="ordercya_orderCy";
 
+
+$conn = new mysqli($servername, $username, $password, $dbname);
 // Check connection
 if (mysqli_connect_errno())
 {
@@ -21,7 +26,8 @@ while ($row = $result->fetch_assoc()) {
                         "VenueID"=>$row['VenueID'],
                         "City"=>$row['City'],
                         "Openhour"=>$row['Openhour'],
-                        "Closehour"=> $row['Closehour']
+                        "Closehour"=> $row['Closehour'],
+                        "Address"=> $row['Address']
 
     );
     array_push($json_array,$restaurant);

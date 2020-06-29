@@ -6,8 +6,13 @@
 //if (mysqli_connect_errno()) {
 //    echo "Failed to connect to MySQL: " . mysqli_connect_error();
 //}
-$conn = new mysqli("localhost", "root", "", "orderCy");
+$servername="ordercy.a2hosted.com";
+$username = "ordercya_root";
+$password = "pu043=+JHQA!";
+$dbname="ordercya_orderCy";
 
+
+$conn = new mysqli($servername, $username, $password, $dbname);
 $order= $_GET["order"];
 $customer = substr($order, 0, strpos($order, '}')+1);
 $itemOrders = substr($order, strpos($order, '}')+1, strlen($order));
@@ -30,7 +35,8 @@ if ($conn->query($orderIDsql) == TRUE) {
     echo "Error: ". $conn->error;
 }
 
-for($i=2;$i<count($decodedOrder);$i++) {
+for($i=0;$i<count($decodedOrder);$i++) {
+    if(isset($decodedOrder[$i]['itemID'])){
     $comment=$decodedOrder[$i]['comment'];
     $commentQty=$decodedOrder[$i]['commentQty'];
     $itemID=$decodedOrder[$i]['itemID'];
@@ -41,6 +47,8 @@ for($i=2;$i<count($decodedOrder);$i++) {
     } else {
         echo "Error: ". $conn->error;
     }
+    }
+    
 }
 
 //echo $customersql.$ordersql;

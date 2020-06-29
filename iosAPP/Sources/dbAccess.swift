@@ -7,7 +7,7 @@ import FoundationNetworking
      //retrieve data from site
         let url = URL(string: "https://ordercy.a2hosted.com/orderCY/getRestaurants.php")!
         let data = try!(Data(contentsOf: url))
-        
+        //print(String(data: data,encoding: .utf8)!)
         var jsonResult = NSArray()
         var Restaurants =  Array<RestaurantModel>()
         
@@ -28,20 +28,23 @@ import FoundationNetworking
             jsonElement = jsonResult[i] as! NSDictionary
             
             let restaurant = RestaurantModel()
-            
+            //print(jsonElement)
             //the following insures none of the JsonElement values are nil through optional binding
-            if let name = jsonElement["Name"] as? String,
-                let city = jsonElement["City"] as? String,
-                let openhour = jsonElement["Openhour"] as? String,
+                let name = jsonElement["Name"] as? String
+                let city = jsonElement["City"] as? String
+                let openhour = jsonElement["Openhour"] as? String
                 let venueID = jsonElement["VenueID"] as? String
-            {
+                let address = jsonElement["Address"] as? String
+            
                 
                 restaurant.name = name
                 restaurant.city = city
                 restaurant.openhour = openhour
                 restaurant.venueID = venueID
+                restaurant.address = address
                 
-            }
+            
+            //print(restaurant.name)
             Restaurants.append(restaurant)
             
         }
@@ -51,8 +54,19 @@ import FoundationNetworking
     }
 
 
+
  func getItemsOfRestaurant(venueID:String) -> Array<ItemModel>{
-        let myUrl = URL(string: "https://ordercy.a2hosted.com/orderCY/getItems.php?venueID=\(venueID)")!;
+        let escapedString = venueID.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)
+
+        var urlQueryItem = URLQueryItem(name: "venueID", value: escapedString)
+        var urlComponents = URLComponents()
+        urlComponents.scheme = "https"
+        urlComponents.host = "ordercy.a2hosted.com"
+        urlComponents.path = "/orderCY/getItems.php"
+        urlComponents.queryItems = [urlQueryItem]
+
+        let myUrl = URL(string: urlComponents.url!.absoluteString)!;
+        print(urlComponents.url!.absoluteString)
         let data = try!(Data(contentsOf: myUrl))
         var jsonResult = NSArray()
         var items =  Array<ItemModel>()
@@ -78,6 +92,7 @@ import FoundationNetworking
             if let name = jsonElement["Name"] as? String,
                 let description = jsonElement["Description"] as? String,
                 let type = jsonElement["Type"] as? String,
+                let type2 = jsonElement["Type2"] as? String,
                 let price = jsonElement["Price"] as? String,
                 let itemID = jsonElement["ItemID"] as? String,
                 let venueID = jsonElement["VenueID"] as? String,
@@ -87,6 +102,7 @@ import FoundationNetworking
                 item.name = name
                 item.description = description
                 item.type = type
+                item.type2 = type2
                 item.price = price
                 item.itemID = itemID
                 item.venueID = venueID
@@ -122,8 +138,8 @@ import FoundationNetworking
 
     var urlQueryItem = URLQueryItem(name: "order", value: customerorder)
     var urlComponents = URLComponents()
-    urlComponents.scheme = "http"
-    urlComponents.host = "localhost"
+    urlComponents.scheme = "https"
+    urlComponents.host = "ordercy.a2hosted.com"
     urlComponents.path = "/orderCY/insertOrder.php"
     urlComponents.queryItems = [urlQueryItem]
     
@@ -198,12 +214,14 @@ class RestaurantModel {
     var city: String?
     var openhour: String?
     var venueID: String?    
+    var address: String?
 }
  
 class ItemModel{
     var name :String?
     var description :String?
     var type :String?
+    var type2 :String?
     var price :String?
     var itemID :String?
     var venueID :String?
@@ -243,9 +261,11 @@ class RestaurantItemsModel{
 
 /*
  var items : Array<ItemModel>! = Array(arrayLiteral: ItemModel())
+//print(getRestaurants()[1].venueID!)
 
-items = getItemsOfRestaurant(venueID:"1");
-
+items = getItemsOfRestaurant(venueID:getRestaurants()[1].venueID!);
+//print(items[0].name!);
+//print(items[0].type2!);
 var order : Array<OrderModel>! = Array(arrayLiteral: OrderModel())
 
 var orderItem: OrderModel = OrderModel()
@@ -271,11 +291,14 @@ var customer : CustomerModel! = CustomerModel()
 
 customer.tableNo = "10"
 customer.telNo = "99938434"
-customer.venueID = "1"
+customer.venueID = getRestaurants()[1].venueID
 
 
 let customerOrder = CustomerOrderModel(Customer: customer, Orders: order) 
 
 
-sumbmitOrder(CustomerOrder: customerOrder)
-print(getItemByID(itemID:"2", itemArray:items).name)*/
+ sumbmitOrder(CustomerOrder: customerOrder)
+// print(getItemByID(itemID:"2", itemArray:items).name)
+// print(getRestaurants()[0].address) 
+
+*/
