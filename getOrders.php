@@ -28,7 +28,7 @@ AND
  AND
  CustomerOrders.VenueID = '{$venueID}'
  
- ORDER BY CustomerOrders.OrderID
+ ORDER BY CustomerOrders.Time
 
  ;";
 $result = $conn->query($sql);

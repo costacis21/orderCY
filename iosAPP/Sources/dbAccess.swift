@@ -259,7 +259,7 @@ class RestaurantItemsModel{
 
 //Testing
 
-/*
+
  var items : Array<ItemModel>! = Array(arrayLiteral: ItemModel())
 //print(getRestaurants()[1].venueID!)
 
@@ -272,16 +272,16 @@ var orderItem: OrderModel = OrderModel()
 var orderItem1: OrderModel = OrderModel()
 
 
-orderItem.itemID = items[0].itemID
-orderItem.comment = "dfsd"
-orderItem.quantity = "34"
-orderItem.commentQty = "54"
+orderItem.itemID = items[1].itemID
+orderItem.comment = "en thelo pikla"
+orderItem.quantity = "1"
+orderItem.commentQty = "1"
 order.append(orderItem)
 
-orderItem1.itemID = items[1].itemID
-orderItem1.comment = "bdsdfsd"
-orderItem1.quantity = "32"
-orderItem1.commentQty = "124"
+orderItem1.itemID = items[0].itemID
+orderItem1.comment = "thelo ntomata"
+orderItem1.quantity = "1"
+orderItem1.commentQty = "1"
 order.append(orderItem1)
 
 
@@ -289,7 +289,7 @@ order.append(orderItem1)
 
 var customer : CustomerModel! = CustomerModel()
 
-customer.tableNo = "10"
+customer.tableNo = "19"
 customer.telNo = "99938434"
 customer.venueID = getRestaurants()[1].venueID
 
@@ -301,4 +301,3 @@ let customerOrder = CustomerOrderModel(Customer: customer, Orders: order)
 // print(getItemByID(itemID:"2", itemArray:items).name)
 // print(getRestaurants()[0].address) 
 
-*/
